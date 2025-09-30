@@ -1,0 +1,39 @@
+<div class="space-y-8">
+  <header class="pb-6 border-b border-stone-200">
+    <h2 class="text-4xl font-bold text-stone-800">Guest Invite Links</h2>
+    <p class="mt-2 text-lg text-stone-600">Generate and share unique links for your guests to access the wedding portal.</p>
+  </header>
+
+  @if (guests().length > 0) {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      @for (guest of guests(); track guest.id) {
+        <div class="bg-white p-6 rounded-2xl shadow-md border border-stone-200 flex flex-col justify-between">
+          <div>
+            <h3 class="text-xl font-bold text-stone-800">{{ guest.name }}</h3>
+            <p class="text-sm text-stone-500 mb-4">{{ guest.email }}</p>
+            <div class="relative mb-2">
+                <input type="text" [value]="getInviteLink(guest.id)" readonly class="w-full bg-stone-100 border border-stone-300 rounded-md px-3 py-2 text-sm text-stone-700 focus:outline-none select-all">
+            </div>
+          </div>
+          <button (click)="copyLink(guest)"
+                  class="w-full mt-4 px-4 py-2 text-white font-semibold rounded-md transition-colors duration-200"
+                  [class.bg-green-500]="copiedLinkId() === guest.id"
+                  [class.hover:bg-green-600]="copiedLinkId() === guest.id"
+                  [class.bg-rose-500]="copiedLinkId() !== guest.id"
+                  [class.hover:bg-rose-600]="copiedLinkId() !== guest.id">
+            @if (copiedLinkId() === guest.id) {
+              <span>✓ Copied!</span>
+            } @else {
+              <span>Copy Link</span>
+            }
+          </button>
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="text-center py-16 bg-white rounded-2xl shadow-md border border-stone-200">
+      <p class="text-stone-500">You haven't added any guests yet.</p>
+      <p class="text-stone-500 mt-2">Go to the 'Guest List' to add guests and generate their invite links.</p>
+    </div>
+  }
+</div>
