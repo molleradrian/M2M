@@ -6,19 +6,25 @@
   "scripts": {
     "dev": "ng serve",
     "build": "ng build",
-    "preview": "ng serve --configuration=production"
+    "preview": "ng serve --configuration=production",
+    "test": "ng test"
   },
   "dependencies": {
-    "@google/genai": "latest",
-    "rxjs": "^7.8.2",
-    "@angular/core": "^20.3.0",
-    "@angular/compiler": "^20.3.0",
-    "@angular/forms": "^20.3.2",
-    "@angular/platform-browser": "^20.3.0",
-    "@angular/common": "^20.3.0",
     "@angular/build": "^20.3.0",
     "@angular/cli": "^20.3.0",
+    "@angular/common": "^20.3.0",
+    "@angular/compiler": "^20.3.0",
     "@angular/compiler-cli": "^20.3.0",
+    "@angular/core": "^20.3.0",
+    "@angular/forms": "^20.3.2",
+    "@angular/platform-browser": "^20.3.0",
+    "@google/genai": "latest",
+    "@types/jasmine": "^5.1.9",
+    "jasmine-core": "^5.11.0",
+    "karma-chrome-launcher": "^3.2.0",
+    "karma-coverage": "^2.2.1",
+    "karma-jasmine": "^5.1.0",
+    "rxjs": "^7.8.2",
     "tailwindcss": "latest"
   },
   "devDependencies": {
