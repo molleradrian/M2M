@@ -5,4 +5,7 @@ export interface Guest {
   name: string;
   email: string;
   rsvpStatus: RsvpStatus;
+  side?: 'Olivia' | 'Liam';
+  parentId?: string | null;
+  traveledFrom?: string; // e.g., "City, Country"
 }

@@ -59,7 +59,7 @@
   </div>
 } @else {
   @if(guestId()) {
-    <app-guest-portal [guestId]="guestId()!"></app-guest-portal>
+    <app-guest-portal [guestId]="guestId()!" [isPlannerView]="isPlannerView()"></app-guest-portal>
   } @else {
     <div class="flex items-center justify-center h-screen bg-stone-50">
         <p class="text-xl text-stone-600">Invalid guest link. Please check your URL.</p>

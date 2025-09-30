@@ -1,9 +1,15 @@
-import { Component, ChangeDetectionStrategy, input, computed, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, computed, inject, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { GuestService } from '../../services/guest.service';
 import { RsvpStatus } from '../../models/guest.model';
 import { ScheduleComponent } from '../schedule/schedule.component';
 import { GalleryComponent } from '../gallery/gallery.component';
+import { GuestbookService } from '../../services/guestbook.service';
+import { SharedGalleryService } from '../../services/shared-gallery.service';
+import { FamilyTreeComponent } from '../family-tree/family-tree.component';
+import { ThankYouNoteService } from '../../services/thank-you-note.service';
+import { FeedbackService } from '../../services/feedback.service';
 
 @Component({
   selector: 'app-guest-portal',
@@ -15,6 +21,43 @@ import { GalleryComponent } from '../gallery/gallery.component';
             <h1 class="text-4xl font-serif text-stone-700">Olivia & Liam's Wedding</h1>
             <p class="text-lg text-stone-500 mt-2">Welcome, {{ currentGuest.name }}!</p>
           </header>
+
+          <!-- Event Details -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 text-center">
+            <!-- Date -->
+            <div class="bg-white p-6 rounded-lg shadow-md flex flex-col items-center justify-center">
+              <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <h3 class="text-xl font-semibold text-stone-700">Date</h3>
+              <p class="text-stone-500 mt-1">Saturday, Oct 26, 2024</p>
+            </div>
+
+            <!-- Time -->
+            <div class="bg-white p-6 rounded-lg shadow-md flex flex-col items-center justify-center">
+              <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 class="text-xl font-semibold text-stone-700">Ceremony</h3>
+              <p class="text-stone-500 mt-1">4:00 PM</p>
+            </div>
+
+            <!-- Venue -->
+            <div class="bg-white p-6 rounded-lg shadow-md flex flex-col items-center justify-center">
+              <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </div>
+              <h3 class="text-xl font-semibold text-stone-700">Venue</h3>
+              <p class="text-stone-500 mt-1">Evergreen Gardens, Napa Valley</p>
+            </div>
+          </div>
 
           <div class="bg-white p-6 rounded-lg shadow-md mb-8">
             <h2 class="text-2xl font-semibold text-stone-700 mb-4">Your Invitation</h2>
@@ -35,12 +78,236 @@ import { GalleryComponent } from '../gallery/gallery.component';
 
             @if (currentGuest.rsvpStatus === 'Attending') {
               <p class="text-center mt-4 text-green-700 font-medium">Thank you! We can't wait to see you there!</p>
+
+              <div class="mt-6 max-w-md mx-auto border-t border-stone-200 pt-6">
+                <label for="traveledFrom" class="block text-sm font-medium text-stone-700 text-center mb-2">To help us with our travel map, please let us know where you'll be traveling from:</label>
+                <div class="flex gap-2">
+                    <input type="text" id="traveledFrom" name="traveledFrom"
+                    [ngModel]="traveledFrom()" (ngModelChange)="traveledFrom.set($event)"
+                    placeholder="e.g., City, Country"
+                    class="block w-full px-3 py-2 bg-white border border-stone-300 rounded-md shadow-sm focus:outline-none focus:ring-rose-500 focus:border-rose-500">
+                    <button (click)="updateTravelInfo()" class="px-4 py-2 text-white rounded-md transition-colors w-24 flex-shrink-0" [class.bg-rose-500]="!travelInfoSaved()" [class.hover:bg-rose-600]="!travelInfoSaved()" [class.bg-green-500]="travelInfoSaved()">
+                        @if(travelInfoSaved()) {
+                            <span>✓ Saved</span>
+                        } @else {
+                            <span>Save</span>
+                        }
+                    </button>
+                </div>
+              </div>
             }
             @if (currentGuest.rsvpStatus === 'Declined') {
               <p class="text-center mt-4 text-red-700 font-medium">We're so sorry you can't make it. You will be missed!</p>
             }
           </div>
+
+          <!-- Gift Registry -->
+          <div class="bg-white p-6 rounded-lg shadow-md mb-8 text-center">
+            <div class="flex justify-center mb-4">
+              <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25v8.25a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 19.5v-8.25M12 4.875A2.625 2.625 0 1014.625 7.5H9.375A2.625 2.625 0 1012 4.875zM21 11.25H3v1.5a2.25 2.25 0 002.25 2.25h13.5A2.25 2.25 0 0021 12.75v-1.5z" />
+                </svg>
+              </div>
+            </div>
+            <h2 class="text-2xl font-semibold text-stone-700 mb-2">A Note on Gifts</h2>
+            <p class="text-stone-600 mb-6 max-w-2xl mx-auto">Your presence at our wedding is the greatest gift of all. However, should you wish to honor us with a gift, we have created a registry for your convenience.</p>
+            <a href="https://everafterregistry.com/olivia-liam" target="_blank" rel="noopener noreferrer"
+              class="inline-block px-8 py-3 bg-rose-500 text-white rounded-md font-semibold hover:bg-rose-600 transition-colors">
+              View Registry
+            </a>
+          </div>
+
+          <!-- Additional Details -->
+          <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+            <h2 class="text-2xl font-semibold text-stone-700 mb-6 text-center">More Information</h2>
+            <div class="space-y-6">
+              @for(detail of weddingDetails; track detail.title) {
+                <div class="flex items-start">
+                  <div class="flex-shrink-0 w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mr-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" [attr.d]="detail.icon" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="text-lg font-semibold text-stone-700">{{ detail.title }}</h3>
+                    <p class="text-stone-500 mt-1">{{ detail.description }}</p>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
           
+          <!-- Guestbook -->
+          <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+            <h2 class="text-2xl font-semibold text-stone-700 mb-2 text-center">Guestbook</h2>
+            <p class="text-center text-stone-500 mb-6">Leave a message for Olivia & Liam!</p>
+
+            <form (submit)="addMessage(); $event.preventDefault()">
+              <textarea 
+                name="newMessage"
+                [ngModel]="newMessage()"
+                (ngModelChange)="newMessage.set($event)"
+                rows="4" 
+                class="w-full p-3 bg-stone-50 border border-stone-300 rounded-md focus:ring-2 focus:ring-rose-400 focus:border-rose-400 outline-none transition duration-200"
+                placeholder="Share your well wishes..."></textarea>
+              <div class="flex justify-end mt-4">
+                <button type="submit"
+                        [disabled]="newMessage().trim() === ''"
+                        class="px-6 py-2 bg-rose-500 text-white rounded-md font-semibold hover:bg-rose-600 transition-colors disabled:bg-rose-300 disabled:cursor-not-allowed">
+                  Post Message
+                </button>
+              </div>
+            </form>
+
+            @if(guestbookMessages().length > 0) {
+              <hr class="my-6 border-stone-200">
+              <div class="space-y-4 max-h-96 overflow-y-auto pr-2">
+                @for(entry of guestbookMessages(); track entry.id) {
+                  <div class="bg-stone-50 p-4 rounded-lg border border-stone-200">
+                    <p class="text-stone-700 italic">"{{ entry.message }}"</p>
+                    <p class="text-right text-stone-600 font-semibold mt-2">- {{ entry.guestName }}</p>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Cherished Memories -->
+          <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+            <h2 class="text-2xl font-semibold text-stone-700 mb-2 text-center">Cherished Memories</h2>
+            <p class="text-center text-stone-500 mb-6">Share your favorite moments from our special day!</p>
+
+            @if (!previewUrl()) {
+              <div class="flex justify-center">
+                <label for="photo-upload" class="cursor-pointer px-6 py-3 bg-rose-500 text-white rounded-md font-semibold hover:bg-rose-600 transition-colors inline-flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                  </svg>
+                  Select a Photo
+                </label>
+                <input type="file" id="photo-upload" class="hidden" (change)="onFileSelected($event)" accept="image/png, image/jpeg, image/gif">
+              </div>
+            } @else {
+              <!-- Upload Preview -->
+              <div class="text-center border-2 border-dashed border-stone-300 p-4 rounded-lg">
+                <img [src]="previewUrl()" alt="Image preview" class="max-h-60 mx-auto rounded-md shadow-sm mb-4">
+                @if(isUploading()) {
+                  <div class="flex items-center justify-center space-x-2 text-stone-600">
+                    <svg class="animate-spin h-5 w-5 text-rose-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>Uploading...</span>
+                  </div>
+                } @else {
+                  <div class="flex justify-center gap-4">
+                    <button (click)="cancelUpload()" class="px-6 py-2 bg-stone-200 text-stone-800 rounded-md font-semibold hover:bg-stone-300 transition-colors">
+                      Cancel
+                    </button>
+                    <button (click)="uploadPhoto()" class="px-6 py-2 bg-green-500 text-white rounded-md font-semibold hover:bg-green-600 transition-colors">
+                      Upload Photo
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+            
+            @if(sharedImages().length > 0) {
+              <hr class="my-6 border-stone-200">
+              <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                @for(image of sharedImages(); track image.id) {
+                  <div class="aspect-w-1 aspect-h-1 group relative cursor-pointer" (click)="viewSharedImage(image.imageDataUrl)">
+                    <img [src]="image.imageDataUrl" alt="Shared memory by {{ image.guestName }}" class="w-full h-full object-cover rounded-lg shadow-md transition-transform duration-300 group-hover:scale-105">
+                     <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white opacity-0 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                    <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-2 rounded-b-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                      By {{ image.guestName }}
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Wedding Feedback -->
+          @if (isAfterWedding() && currentGuest.rsvpStatus === 'Attending') {
+            <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+              <h2 class="text-2xl font-semibold text-stone-700 mb-2 text-center">Share Your Thoughts</h2>
+              <p class="text-center text-stone-500 mb-6">We'd love to hear about your experience at our wedding!</p>
+              
+              @if (submittedFeedback(); as feedback) {
+                <div class="text-center p-4 bg-green-100 text-green-800 rounded-lg">
+                  <p class="font-semibold">Thank you for your lovely feedback!</p>
+                  <p class="mt-2 italic text-left whitespace-pre-wrap">"{{ feedback.message }}"</p>
+                </div>
+              } @else {
+                <form (submit)="submitFeedback(); $event.preventDefault()">
+                  <textarea 
+                    name="feedbackText"
+                    [ngModel]="feedbackText()"
+                    (ngModelChange)="feedbackText.set($event)"
+                    rows="5" 
+                    class="w-full p-3 bg-stone-50 border border-stone-300 rounded-md focus:ring-2 focus:ring-rose-400 focus:border-rose-400 outline-none transition duration-200"
+                    placeholder="What was your favorite moment? Any suggestions for us?">
+                  </textarea>
+                  <div class="flex justify-end mt-4">
+                    <button type="submit"
+                            [disabled]="feedbackText().trim() === ''"
+                            class="px-6 py-2 bg-rose-500 text-white rounded-md font-semibold hover:bg-rose-600 transition-colors disabled:bg-rose-300 disabled:cursor-not-allowed">
+                      Submit Feedback
+                    </button>
+                  </div>
+                </form>
+              }
+            </div>
+          }
+
+          <!-- Thank You Notes (Planner only) -->
+          @if (isPlannerView() && currentGuest.rsvpStatus === 'Attending') {
+            <div class="bg-indigo-50 p-6 rounded-lg shadow-md mb-8 border-l-4 border-indigo-400">
+              <h2 class="text-2xl font-semibold text-stone-700 mb-2 text-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline-block mr-2 -mt-1 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" />
+                </svg>
+                Planner Action: Thank You Note
+              </h2>
+              <p class="text-center text-stone-500 mb-6">Write a personal thank you note to {{ currentGuest.name }}. This section is only visible to you.</p>
+              
+              @if (sentNote(); as note) {
+                <div class="text-center p-4 bg-green-100 text-green-800 rounded-lg">
+                  <p class="font-semibold">Thank you note sent on {{ note.sentAt.toLocaleDateString() }}:</p>
+                  <p class="mt-2 italic text-left whitespace-pre-wrap">"{{ note.note }}"</p>
+                </div>
+              } @else {
+                <form (submit)="sendThankYouNote(); $event.preventDefault()">
+                  <textarea 
+                    name="thankYouNote"
+                    [ngModel]="thankYouNote()"
+                    (ngModelChange)="thankYouNote.set($event)"
+                    rows="5" 
+                    class="w-full p-3 bg-white border border-stone-300 rounded-md focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 outline-none transition duration-200"
+                    [placeholder]="'Dear ' + currentGuest.name + ',\\n\\nThank you so much for celebrating with us...'">
+                  </textarea>
+                  <div class="flex justify-end mt-4">
+                    <button type="submit"
+                            [disabled]="thankYouNote().trim() === ''"
+                            class="px-6 py-2 bg-indigo-500 text-white rounded-md font-semibold hover:bg-indigo-600 transition-colors disabled:bg-indigo-300 disabled:cursor-not-allowed">
+                      Send Note
+                    </button>
+                  </div>
+                </form>
+              }
+            </div>
+          }
+
+          <div class="mb-8">
+            <app-family-tree></app-family-tree>
+          </div>
+
           <div class="mb-8">
             <app-schedule></app-schedule>
           </div>
@@ -54,6 +321,24 @@ import { GalleryComponent } from '../gallery/gallery.component';
             <p>Evergreen Gardens, Napa Valley, CA</p>
           </footer>
         </div>
+        
+        <!-- Shared Image Modal -->
+        @if (selectedSharedImageUrl()) {
+          <div 
+            class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4"
+            (click)="closeSharedImageModal()">
+            <div class="relative" (click)="$event.stopPropagation()">
+              <img [src]="selectedSharedImageUrl()" alt="Enlarged shared view" class="max-w-full max-h-[90vh] rounded-lg shadow-2xl">
+              <button 
+                (click)="closeSharedImageModal()"
+                class="absolute -top-4 -right-4 bg-white text-stone-800 rounded-full p-2 hover:bg-rose-100 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        }
       </div>
     } @else {
       <div class="flex items-center justify-center h-screen bg-stone-50">
@@ -65,19 +350,165 @@ import { GalleryComponent } from '../gallery/gallery.component';
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, ScheduleComponent, GalleryComponent]
+  imports: [CommonModule, FormsModule, ScheduleComponent, GalleryComponent, FamilyTreeComponent]
 })
 export class GuestPortalComponent {
   guestId = input.required<string>();
+  isPlannerView = input<boolean>(false);
   
   private guestService = inject(GuestService);
+  private guestbookService = inject(GuestbookService);
+  private sharedGalleryService = inject(SharedGalleryService);
+  private thankYouNoteService = inject(ThankYouNoteService);
+  private feedbackService = inject(FeedbackService);
 
   guest = computed(() => this.guestService.getGuestById(this.guestId()));
+  guestbookMessages = this.guestbookService.messages;
+  newMessage = signal('');
+  
+  sharedImages = this.sharedGalleryService.images;
+  isUploading = signal(false);
+  selectedFile = signal<File | null>(null);
+  previewUrl = signal<string | null>(null);
+  selectedSharedImageUrl = signal<string | null>(null);
+
+  traveledFrom = signal('');
+  travelInfoSaved = signal(false);
+
+  thankYouNote = signal('');
+  sentNote = computed(() => this.thankYouNoteService.getNoteForGuest(this.guestId()));
+  
+  feedbackText = signal('');
+  submittedFeedback = computed(() => this.feedbackService.getFeedbackForGuest(this.guestId()));
+  isAfterWedding = signal(new Date() > new Date('2024-10-26T23:59:59'));
+
+  constructor() {
+    effect(() => {
+      this.traveledFrom.set(this.guest()?.traveledFrom ?? '');
+    });
+  }
+
+  weddingDetails = [
+    {
+      title: 'Dress Code',
+      description: 'Formal Attire. Think suits for men and cocktail or evening dresses for women.',
+      icon: 'M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.898 20.562L16.25 22.5l-.648-1.938a3.375 3.375 0 00-2.456-2.456L11.25 18l1.938-.648a3.375 3.375 0 002.456-2.456L16.25 13l.648 1.938a3.375 3.375 0 002.456 2.456L21 18l-1.938.648a3.375 3.375 0 00-2.456 2.456z'
+    },
+    {
+      title: 'Parking',
+      description: 'Ample free parking is available for all guests at the venue.',
+      icon: 'M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.125-.504 1.125-1.125V14.25m-17.25 4.5v-1.875a3.375 3.375 0 013.375-3.375h9.75a3.375 3.375 0 013.375 3.375v1.875m-16.5-12.75h9.75a1.125 1.125 0 011.125 1.125V9.75M8.25 21h8.25'
+    }
+  ];
 
   updateRsvp(status: RsvpStatus) {
     const currentGuest = this.guest();
     if (currentGuest) {
       this.guestService.updateGuest({ ...currentGuest, rsvpStatus: status });
+    }
+  }
+
+  updateTravelInfo() {
+    const currentGuest = this.guest();
+    if (currentGuest) {
+      this.guestService.updateGuest({ ...currentGuest, traveledFrom: this.traveledFrom().trim() });
+      this.travelInfoSaved.set(true);
+      setTimeout(() => this.travelInfoSaved.set(false), 2000);
+    }
+  }
+
+  addMessage() {
+    const message = this.newMessage().trim();
+    const currentGuest = this.guest();
+    if (message && currentGuest) {
+      this.guestbookService.addMessage({
+        guestId: currentGuest.id,
+        guestName: currentGuest.name,
+        message: message,
+      });
+      this.newMessage.set('');
+    }
+  }
+  
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      this.selectedFile.set(file);
+
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.previewUrl.set(e.target.result);
+      };
+      reader.readAsDataURL(file);
+      
+      input.value = '';
+    }
+  }
+
+  cancelUpload() {
+    this.selectedFile.set(null);
+    this.previewUrl.set(null);
+  }
+
+  uploadPhoto() {
+    const file = this.selectedFile();
+    if (!file) return;
+
+    const reader = new FileReader();
+    this.isUploading.set(true);
+
+    reader.onload = (e: any) => {
+      const currentGuest = this.guest();
+      if (currentGuest) {
+        this.sharedGalleryService.addImage({
+          guestId: currentGuest.id,
+          guestName: currentGuest.name,
+          imageDataUrl: e.target.result,
+        });
+      }
+      this.isUploading.set(false);
+      this.cancelUpload();
+    };
+    
+    reader.onerror = error => {
+      console.error('Error reading file:', error);
+      this.isUploading.set(false);
+    };
+
+    reader.readAsDataURL(file);
+  }
+
+  viewSharedImage(url: string) {
+    this.selectedSharedImageUrl.set(url);
+  }
+
+  closeSharedImageModal() {
+    this.selectedSharedImageUrl.set(null);
+  }
+
+  sendThankYouNote() {
+    const note = this.thankYouNote().trim();
+    const currentGuest = this.guest();
+    if (note && currentGuest) {
+      this.thankYouNoteService.addNote({
+        guestId: currentGuest.id,
+        note: note,
+      });
+      this.thankYouNote.set('');
+    }
+  }
+
+  submitFeedback() {
+    const message = this.feedbackText().trim();
+    const currentGuest = this.guest();
+    if (message && currentGuest) {
+      this.feedbackService.addFeedback({
+        guestId: currentGuest.id,
+        guestName: currentGuest.name,
+        message: message,
+      });
+      this.feedbackText.set('');
     }
   }
 }

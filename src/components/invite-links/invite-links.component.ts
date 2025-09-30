@@ -20,6 +20,15 @@ export class InviteLinksComponent {
     return `${baseUrl}#/guest/${guestId}`;
   }
 
+  getPlannerViewLink(guestId: string): string {
+    const baseUrl = window.location.origin + window.location.pathname;
+    return `${baseUrl}#/guest/${guestId}?as=planner`;
+  }
+
+  openPlannerView(guestId: string) {
+    window.open(this.getPlannerViewLink(guestId), '_blank');
+  }
+
   copyLink(guest: Guest) {
     const link = this.getInviteLink(guest.id);
     navigator.clipboard.writeText(link).then(() => {

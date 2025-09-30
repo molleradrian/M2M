@@ -30,6 +30,7 @@ export class AppComponent implements OnInit, OnDestroy {
   selectedView = signal<View>('dashboard');
   viewMode = signal<'planner' | 'guest'>('planner');
   guestId = signal<string | null>(null);
+  isPlannerView = signal(false);
 
   constructor() {
     this.handleHashChange(); // Check initial hash on load
@@ -44,7 +45,11 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   private handleHashChange = () => {
-    const hash = window.location.hash;
+    const [hash, queryString] = window.location.hash.split('?');
+    const params = new URLSearchParams(queryString);
+    
+    this.isPlannerView.set(params.get('as') === 'planner');
+
     const guestMatch = hash.match(/^#\/guest\/(.+)$/);
 
     if (guestMatch && guestMatch[1]) {
@@ -53,6 +58,7 @@ export class AppComponent implements OnInit, OnDestroy {
     } else {
       this.guestId.set(null);
       this.viewMode.set('planner');
+      this.isPlannerView.set(false);
     }
   };
 
