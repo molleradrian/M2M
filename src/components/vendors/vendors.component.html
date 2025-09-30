@@ -90,7 +90,11 @@
         <tbody class="divide-y divide-stone-200">
           @for (vendor of vendors(); track vendor.id) {
             <tr>
-              <td class="px-6 py-4 whitespace-nowrap text-stone-800 font-medium">{{ vendor.name }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-stone-800 font-medium">
+                <a [routerLink]="['/vendors', vendor.id]" class="hover:text-rose-600 hover:underline">
+                  {{ vendor.name }}
+                </a>
+              </td>
               <td class="px-6 py-4 whitespace-nowrap text-stone-600">{{ vendor.category }}</td>
               <td class="px-6 py-4 whitespace-nowrap text-stone-600">
                 <div class="text-sm">{{ vendor.contactPerson }}</div>

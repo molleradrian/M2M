@@ -1,0 +1,31 @@
+<div class="bg-white p-6 rounded-lg shadow-inner border border-stone-200">
+  <h3 class="text-3xl font-bold text-stone-800 text-center mb-4">Guestbook</h3>
+  <p class="text-center text-stone-600 mb-6">Leave a message for the happy couple!</p>
+
+  <!-- Form for new message -->
+  <form [formGroup]="messageForm" (ngSubmit)="submitMessage()" class="mb-8 max-w-lg mx-auto">
+    <textarea formControlName="message" rows="4" 
+              class="w-full p-3 bg-white border border-stone-300 rounded-md shadow-sm focus:outline-none focus:ring-rose-500 focus:border-rose-500" 
+              placeholder="Your well wishes..."></textarea>
+    <div class="text-right mt-3">
+      <button type="submit" [disabled]="messageForm.invalid" 
+              class="px-4 py-2 bg-rose-500 text-white font-semibold rounded-md hover:bg-rose-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 disabled:bg-rose-300 transition-colors">
+        Post Message
+      </button>
+    </div>
+  </form>
+
+  <!-- Display messages -->
+  <div class="space-y-6 max-h-96 overflow-y-auto pr-4">
+    @for(entry of messages(); track entry.id) {
+      <div class="bg-stone-50 p-4 rounded-lg border border-stone-200">
+        <p class="text-stone-700 italic">"{{ entry.message }}"</p>
+        <p class="text-right text-sm font-semibold text-stone-600 mt-2">- {{ entry.guestName }}</p>
+        <p class="text-right text-xs text-stone-400">{{ entry.createdAt | date:'medium' }}</p>
+      </div>
+    }
+    @if(messages().length === 0) {
+      <p class="text-center text-stone-500 py-8">Be the first to leave a message!</p>
+    }
+  </div>
+</div>

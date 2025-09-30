@@ -7,6 +7,7 @@ import { GuestRequestService } from '../../services/guest-request.service';
 import { ScheduleComponent } from '../schedule/schedule.component';
 import { MenuComponent } from '../menu/menu.component';
 import { GalleryComponent } from '../gallery/gallery.component';
+import { GuestbookComponent } from '../guestbook/guestbook.component';
 
 @Component({
   selector: 'app-guest-portal',
@@ -16,6 +17,7 @@ import { GalleryComponent } from '../gallery/gallery.component';
     MenuComponent,
     GalleryComponent,
     ReactiveFormsModule,
+    GuestbookComponent,
   ],
   templateUrl: './guest-portal.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

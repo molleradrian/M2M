@@ -1,6 +1,7 @@
 import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { Vendor, VendorCategory, VendorStatus } from '../../models/vendor.model';
 import { VendorService } from '../../services/vendor.service';
 
@@ -8,7 +9,7 @@ import { VendorService } from '../../services/vendor.service';
   selector: 'app-vendors',
   templateUrl: './vendors.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, ReactiveFormsModule]
+  imports: [CommonModule, ReactiveFormsModule, RouterLink]
 })
 export class VendorsComponent {
   private vendorService = inject(VendorService);
