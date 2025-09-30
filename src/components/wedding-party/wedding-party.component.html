@@ -1,0 +1,56 @@
+<div class="space-y-12">
+  <header class="pb-6 border-b border-stone-200 text-center">
+    <h2 class="text-4xl font-bold text-stone-800">The Wedding Party</h2>
+    <p class="mt-2 text-lg text-stone-600">The people who will be standing by our side.</p>
+  </header>
+
+  <!-- Olivia's Attendants -->
+  <div>
+    <h3 class="text-3xl font-semibold text-rose-800 mb-6 text-center font-serif">Olivia's Attendants</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
+      @for(person of bridesmaids(); track person.name) {
+        <div class="text-center">
+          <div class="relative w-48 h-48 mx-auto mb-4">
+            <img [ngSrc]="person.imageUrl" [alt]="person.name" width="400" height="400" class="w-full h-full object-cover rounded-full shadow-lg">
+          </div>
+          <h4 class="text-xl font-bold text-stone-800">{{ person.name }}</h4>
+          <p class="text-md text-stone-500">{{ person.role }}</p>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Liam's Attendants -->
+  <div>
+    <h3 class="text-3xl font-semibold text-rose-800 mb-6 text-center font-serif">Liam's Attendants</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
+      @for(person of groomsmen(); track person.name) {
+        <div class="text-center">
+          <div class="relative w-48 h-48 mx-auto mb-4">
+            <img [ngSrc]="person.imageUrl" [alt]="person.name" width="400" height="400" class="w-full h-full object-cover rounded-full shadow-lg">
+          </div>
+          <h4 class="text-xl font-bold text-stone-800">{{ person.name }}</h4>
+          <p class="text-md text-stone-500">{{ person.role }}</p>
+        </div>
+      }
+    </div>
+  </div>
+  
+  <!-- Hosts and MCs -->
+  @if(hostsAndMcs().length > 0) {
+    <div>
+      <h3 class="text-3xl font-semibold text-rose-800 mb-6 text-center font-serif">Hosts & MCs</h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
+        @for(person of hostsAndMcs(); track person.name) {
+          <div class="text-center">
+            <div class="relative w-48 h-48 mx-auto mb-4">
+              <img [ngSrc]="person.imageUrl" [alt]="person.name" width="400" height="400" class="w-full h-full object-cover rounded-full shadow-lg">
+            </div>
+            <h4 class="text-xl font-bold text-stone-800">{{ person.name }}</h4>
+            <p class="text-md text-stone-500">{{ person.role }}</p>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

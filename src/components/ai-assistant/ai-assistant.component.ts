@@ -15,7 +15,7 @@ export class AiAssistantComponent {
 
   userInput = signal('');
   messages = signal<ChatMessage[]>([
-    { sender: 'ai', text: 'Hello! I am the virtual assistant for Olivia and Liam\'s wedding. How can I help you today?' }
+    { sender: 'ai', text: 'Hello! I am The Co-Ordinator, the virtual assistant for Olivia and Liam\'s wedding. How can I help you today?' }
   ]);
   isLoading = signal(false);
   

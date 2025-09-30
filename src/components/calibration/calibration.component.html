@@ -1,0 +1,123 @@
+<div class="fixed inset-0 bg-stone-100 z-50 flex flex-col items-center justify-center p-4 font-sans">
+  <div class="w-full max-w-3xl bg-white rounded-2xl shadow-xl border border-stone-200 p-8 transition-all duration-500 ease-in-out">
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-bold text-stone-800 font-serif">Welcome to M2M</h1>
+      <p class="mt-2 text-lg text-stone-600">Let's personalize your wedding planning experience.</p>
+      
+      <!-- Progress Bar -->
+      <div class="flex items-center justify-center mt-6 space-x-2">
+        @for(s of [1,2,3]; track s) {
+          <div class="w-24 h-2 rounded-full transition-colors" [class.bg-rose-500]="step() >= s" [class.bg-stone-200]="step() < s"></div>
+        }
+      </div>
+    </div>
+
+    <!-- Step Content -->
+    <div class="min-h-[320px]">
+      @switch (step()) {
+        @case (1) {
+          <!-- Step 1: Wedding Style -->
+          <div class="animate-fade-in">
+            <h2 class="text-2xl font-semibold text-stone-700 text-center mb-6">What's your wedding style?</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+              @for(style of styles; track style.name) {
+                <button (click)="selectedStyle.set(style.name)" 
+                        class="p-4 border rounded-lg transition-all duration-200 flex flex-col items-center space-y-3"
+                        [class.border-rose-500]="selectedStyle() === style.name"
+                        [class.ring-2]="selectedStyle() === style.name"
+                        [class.ring-rose-300]="selectedStyle() === style.name"
+                        [class.shadow-lg]="selectedStyle() === style.name"
+                        [class.border-stone-200]="selectedStyle() !== style.name"
+                        [class.hover:border-rose-400]="selectedStyle() !== style.name"
+                        [class.hover:shadow-md]="selectedStyle() !== style.name">
+                  <div class="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
+                      <path stroke-linecap="round" stroke-linejoin="round" [attr.d]="style.icon" />
+                    </svg>
+                  </div>
+                  <span class="font-semibold text-stone-700">{{ style.name }}</span>
+                </button>
+              }
+            </div>
+          </div>
+        }
+        @case (2) {
+          <!-- Step 2: Wedding Size -->
+          <div class="animate-fade-in">
+            <h2 class="text-2xl font-semibold text-stone-700 text-center mb-6">How big is the celebration?</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              @for(size of sizes; track size.name) {
+                <button (click)="selectedSize.set(size.name)" 
+                        class="p-4 border rounded-lg transition-all duration-200 flex flex-col items-center space-y-3"
+                        [class.border-rose-500]="selectedSize() === size.name"
+                        [class.ring-2]="selectedSize() === size.name"
+                        [class.ring-rose-300]="selectedSize() === size.name"
+                        [class.shadow-lg]="selectedSize() === size.name"
+                        [class.border-stone-200]="selectedSize() !== size.name"
+                        [class.hover:border-rose-400]="selectedSize() !== size.name"
+                        [class.hover:shadow-md]="selectedSize() !== size.name">
+                   <div class="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
+                      <path stroke-linecap="round" stroke-linejoin="round" [attr.d]="size.icon" />
+                    </svg>
+                  </div>
+                  <span class="font-semibold text-stone-700">{{ size.name }}</span>
+                  <span class="text-sm text-stone-500">{{ size.range }}</span>
+                </button>
+              }
+            </div>
+          </div>
+        }
+        @case (3) {
+          <!-- Step 3: Features -->
+          <div class="animate-fade-in">
+             <h2 class="text-2xl font-semibold text-stone-700 text-center mb-2">Choose your planning tools</h2>
+             <p class="text-center text-stone-500 mb-6">You can always change this later in settings.</p>
+             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-64 overflow-y-auto pr-2">
+                @for(feature of allFeatures; track feature.id) {
+                  <label class="flex items-start p-4 border rounded-lg cursor-pointer transition-colors" [class.bg-rose-50]="selectedFeatures()[feature.id]" [class.border-rose-200]="selectedFeatures()[feature.id]">
+                    <input type="checkbox" class="h-5 w-5 rounded border-stone-300 text-rose-600 focus:ring-rose-500 mt-0.5" 
+                           [checked]="selectedFeatures()[feature.id]"
+                           (change)="toggleFeatureSelection(feature.id, $event)">
+                    <div class="ml-3 text-sm">
+                      <span class="font-medium text-stone-800">{{ feature.name }}</span>
+                      <p class="text-stone-500">{{ feature.description }}</p>
+                    </div>
+                  </label>
+                }
+             </div>
+          </div>
+        }
+      }
+    </div>
+
+    <!-- Navigation -->
+    <div class="flex pt-8 mt-4 border-t border-stone-200" [class.justify-between]="step() > 1" [class.justify-end]="step() === 1">
+      @if (step() > 1) {
+        <button (click)="prevStep()" class="px-6 py-2 font-semibold text-stone-700 bg-stone-200 rounded-md hover:bg-stone-300 transition-colors">
+          Back
+        </button>
+      }
+      @if (step() < 3) {
+        <button (click)="nextStep()" [disabled]="isNextDisabled()" class="px-6 py-2 font-semibold text-white bg-rose-500 rounded-md hover:bg-rose-600 disabled:bg-rose-300 disabled:cursor-not-allowed transition-colors">
+          Next
+        </button>
+      }
+      @if (step() === 3) {
+        <button (click)="finishCalibration()" class="px-6 py-2 font-semibold text-white bg-green-500 rounded-md hover:bg-green-600 transition-colors">
+          Finish Setup
+        </button>
+      }
+    </div>
+  </div>
+</div>
+
+<style>
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>

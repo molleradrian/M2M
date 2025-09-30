@@ -24,7 +24,8 @@ export class FamilyTreeService {
 
   private trees = computed(() => {
     const guests = this.attendingGuests();
-    const guestsById = new Map(guests.map(g => [g.id, { ...g, children: [] } as TreeNode]));
+    // FIX: Explicitly type the Map to ensure correct type inference for its values.
+    const guestsById: Map<string, TreeNode> = new Map(guests.map(g => [g.id, { ...g, children: [] }]));
     const roots: { olivia: TreeNode[], liam: TreeNode[] } = { olivia: [], liam: [] };
 
     for (const guest of guestsById.values()) {

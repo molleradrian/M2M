@@ -1,80 +1,84 @@
-@if (viewMode() === 'guest') {
-  @if(guestId()) {
-    <app-guest-portal [guestId]="guestId()!" [isPlannerView]="isPlannerView()"></app-guest-portal>
+<div class="h-screen w-screen bg-stone-50 text-stone-800 antialiased">
+  @if (!isCalibrated()) {
+    <app-calibration></app-calibration>
+  } @else if (!isAuthenticated()) {
+    <app-login></app-login>
   } @else {
-    <div class="flex items-center justify-center h-screen bg-stone-50">
-        <p class="text-xl text-stone-600">Invalid guest link. Please check your URL.</p>
-    </div>
-  }
-} @else {
-  @if (isAuthenticated()) {
-    <div class="flex h-screen bg-stone-100">
+    <div class="flex h-full">
       <!-- Sidebar -->
-      <aside class="w-64 bg-white shadow-lg flex flex-col p-4 border-r border-stone-200">
-        <div class="text-center py-4 border-b border-stone-200 mb-6">
-          <h1 class="text-3xl font-bold text-stone-800">Ever After</h1>
-          <p class="text-sm text-stone-500 mt-1">Olivia & Liam</p>
-        </div>
-        <nav class="flex-grow">
-          <ul class="space-y-2">
-            @for (item of (navItems | keyvalue); track item.key) {
-              <li>
-                <button
-                  (click)="changeView(item.key)"
-                  [class.bg-rose-50]="selectedView() === item.key"
-                  [class.text-rose-600]="selectedView() === item.key"
-                  [class.text-stone-600]="selectedView() !== item.key"
-                  class="w-full flex items-center p-3 rounded-lg hover:bg-rose-50 hover:text-rose-600 transition-colors duration-200">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-3">
-                    <path stroke-linecap="round" stroke-linejoin="round" [attr.d]="item.value.icon" />
-                  </svg>
-                  <span class="font-semibold">{{ item.value.label }}</span>
-                </button>
-              </li>
-            }
-          </ul>
-        </nav>
-        <div class="pt-4 mt-auto border-t border-stone-200">
-           <button (click)="logout()" class="w-full flex items-center p-3 rounded-lg text-stone-600 hover:bg-stone-100 hover:text-stone-800 transition-colors duration-200">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-3">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m-3-3l-3 3m0 0l3 3m-3-3h9" />
+      <aside 
+        class="flex flex-col bg-white border-r border-stone-200 transition-all duration-300 ease-in-out"
+        [class.w-64]="isSidebarOpen()"
+        [class.w-20]="!isSidebarOpen()">
+
+        <!-- Header -->
+        <div class="flex items-center h-16 border-b border-stone-200 px-4 flex-shrink-0" [class.justify-between]="isSidebarOpen()" [class.justify-center]="!isSidebarOpen()">
+          @if (isSidebarOpen()) {
+            <a href="#/dashboard" class="flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-7 h-7 text-rose-500">
+                <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-1.344-.914 3.058 3.058 0 01-1.8-3.055l.007-.003c.017-.22.032-.441.046-.662M4.5 12a7.5 7.5 0 0115 0c0 .878-.135 1.718-.38 2.504l.007-.003a3.058 3.058 0 01-1.8 3.055 15.247 15.247 0 01-1.344.914l-.022.012-.007.003h-.001a.75.75 0 01-.709 0l-.007-.003-.022-.012a15.247 15.247 0 01-1.344-.914 3.058 3.058 0 01-1.8-3.055l.007-.003c.017-.22.032-.441.046-.662M12 15a3 3 0 100-6 3 3 0 000 6z" />
+              </svg>
+              <span class="font-semibold text-lg text-stone-700">WedPlan AI</span>
+            </a>
+          }
+          <button (click)="toggleSidebar()" class="p-1 rounded-full hover:bg-stone-100 text-stone-500">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" />
             </svg>
-            <span class="font-semibold">Logout</span>
           </button>
-          <div class="text-center pt-2">
-            <p class="text-xs text-stone-400">Wedding Day</p>
-            <p class="text-lg font-semibold text-stone-700">Oct 26, 2024</p>
-          </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 overflow-y-auto p-4 space-y-2">
+          @for(item of navItems(); track item.path) {
+            <a [routerLink]="item.path" 
+              routerLinkActive="bg-rose-50 text-rose-700"
+              class="flex items-center gap-3 p-2 rounded-md text-stone-600 hover:bg-stone-100 hover:text-stone-900 transition-colors duration-200"
+              [class.justify-center]="!isSidebarOpen()">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" [attr.d]="item.icon" />
+              </svg>
+              @if(isSidebarOpen()) {
+                <span class="font-medium text-sm">{{ item.label }}</span>
+              }
+            </a>
+          }
+        </nav>
+        
+        <!-- Footer -->
+        <div class="p-4 border-t border-stone-200">
+          <a routerLink="/settings" 
+             routerLinkActive="bg-rose-50 text-rose-700"
+             class="flex items-center gap-3 p-2 rounded-md text-stone-600 hover:bg-stone-100 hover:text-stone-900 transition-colors duration-200" [class.justify-center]="!isSidebarOpen()">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 flex-shrink-0">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12a7.5 7.5 0 0015 0m-15 0a7.5 7.5 0 1115 0m-15 0H3m16.5 0H21m-1.5 0H12m-8.457 3.077l1.41-.513m14.095-5.13l1.41-.513M5.106 17.785l1.153-.96m12.17-12.17l1.153-.96M8.61 3.53A4.5 4.5 0 0112 2.25a4.5 4.5 0 013.39 1.28m-6.78 12.89A4.5 4.5 0 0112 21.75a4.5 4.5 0 013.39-1.28" />
+            </svg>
+            @if(isSidebarOpen()) {
+                <span class="font-medium text-sm">Settings</span>
+              }
+          </a>
+          <button (click)="logout()" class="w-full flex items-center gap-3 p-2 rounded-md text-stone-600 hover:bg-stone-100 hover:text-stone-900 transition-colors duration-200 mt-2" [class.justify-center]="!isSidebarOpen()">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 flex-shrink-0">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+            </svg>
+            @if (isSidebarOpen()) {
+              <span class="font-medium text-sm">Logout</span>
+            }
+          </button>
         </div>
       </aside>
 
       <!-- Main Content -->
-      <main class="flex-1 p-8 overflow-y-auto">
-        <div class="max-w-7xl mx-auto">
-          @switch (selectedView()) {
-            @case ('dashboard') {
-              <app-dashboard></app-dashboard>
-            }
-            @case ('schedule') {
-              <app-schedule></app-schedule>
-            }
-            @case ('gallery') {
-              <app-gallery></app-gallery>
-            }
-            @case ('guest-list') {
-              <app-guest-list></app-guest-list>
-            }
-            @case ('invite-links') {
-              <app-invite-links></app-invite-links>
-            }
-            @case ('assistant') {
-              <app-ai-assistant></app-ai-assistant>
-            }
-          }
+      <main class="flex-1 flex flex-col h-full">
+        <header class="h-16 border-b border-stone-200 flex-shrink-0 flex items-center px-6">
+          <h1 class="text-xl font-semibold text-stone-800">
+            {{ profile().brideName }} & {{ profile().groomName }}
+          </h1>
+        </header>
+        <div class="flex-1 overflow-y-auto p-6 bg-stone-100/50">
+          <router-outlet></router-outlet>
         </div>
       </main>
     </div>
-  } @else {
-    <app-login></app-login>
   }
-}
+</div>

@@ -1,21 +1,25 @@
-import { Component, ChangeDetectionStrategy, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, ChangeDetectionStrategy, signal, computed, inject, effect } from '@angular/core';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { WeddingProfileService } from '../../services/wedding-profile.service';
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule]
+  imports: [CommonModule, NgOptimizedImage]
 })
 export class DashboardComponent {
+  private profileService = inject(WeddingProfileService);
+  profile = this.profileService.profile;
+  
   daysRemaining = signal(0);
   
   constructor() {
-    this.calculateDaysRemaining();
+    effect(() => this.calculateDaysRemaining());
   }
   
   private calculateDaysRemaining() {
-    const weddingDate = new Date('2024-10-26T00:00:00');
+    const weddingDate = new Date(this.profile().weddingDate + 'T00:00:00');
     const today = new Date();
     const timeDiff = weddingDate.getTime() - today.getTime();
     const days = Math.ceil(timeDiff / (1000 * 3600 * 24));

@@ -1,5 +1,5 @@
 {
-  "name": "M2M",
-  "description": "An elegant, AI-powered wedding planning application to manage your special day from invites to thank you notes. Keep guests informed and cherish memories with a shared visual library.",
+  "name": "M2M Wedding Planner",
+  "description": "An elegant, AI-powered wedding planning application to manage your special day. Features guest management, personalized bridal party itineraries, vendor tracking, and a new user calibration test for a tailored experience.",
   "requestFramePermissions": []
 }

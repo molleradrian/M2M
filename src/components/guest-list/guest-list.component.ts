@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Guest, RsvpStatus } from '../../models/guest.model';
 import { GuestService } from '../../services/guest.service';
 
@@ -8,21 +8,21 @@ import { GuestService } from '../../services/guest.service';
   selector: 'app-guest-list',
   templateUrl: './guest-list.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule]
+  imports: [CommonModule, ReactiveFormsModule]
 })
 export class GuestListComponent {
   private guestService = inject(GuestService);
+  private fb = inject(FormBuilder);
   
   guests = this.guestService.guests;
-
   editingGuest = signal<Guest | null>(null);
-  
-  // Model for the form
-  guestName = signal('');
-  guestEmail = signal('');
-  guestRsvpStatus = signal<RsvpStatus>('Pending');
-  
   rsvpStatuses: RsvpStatus[] = ['Pending', 'Attending', 'Declined'];
+
+  guestForm = this.fb.group({
+    name: ['', Validators.required],
+    email: ['', [Validators.required, Validators.email]],
+    rsvpStatus: ['Pending' as RsvpStatus, Validators.required]
+  });
 
   stats = computed(() => {
     const total = this.guests().length;
@@ -32,31 +32,27 @@ export class GuestListComponent {
   });
 
   handleSubmit() {
+    if (this.guestForm.invalid) return;
+
     if (this.editingGuest()) {
-      // Update existing guest
       const updatedGuest: Guest = { 
         ...this.editingGuest()!, 
-        name: this.guestName(),
-        email: this.guestEmail(),
-        rsvpStatus: this.guestRsvpStatus()
+        ...(this.guestForm.value as Partial<Guest>)
       };
       this.guestService.updateGuest(updatedGuest);
     } else {
-      // Add new guest
-      this.guestService.addGuest({
-        name: this.guestName(),
-        email: this.guestEmail(),
-        rsvpStatus: this.guestRsvpStatus()
-      });
+      this.guestService.addGuest(this.guestForm.value as Omit<Guest, 'id'>);
     }
     this.resetForm();
   }
 
   editGuest(guest: Guest) {
     this.editingGuest.set(guest);
-    this.guestName.set(guest.name);
-    this.guestEmail.set(guest.email);
-    this.guestRsvpStatus.set(guest.rsvpStatus);
+    this.guestForm.patchValue({
+      name: guest.name,
+      email: guest.email,
+      rsvpStatus: guest.rsvpStatus
+    });
   }
 
   deleteGuest(guest: Guest) {
@@ -67,9 +63,11 @@ export class GuestListComponent {
 
   resetForm() {
     this.editingGuest.set(null);
-    this.guestName.set('');
-    this.guestEmail.set('');
-    this.guestRsvpStatus.set('Pending');
+    this.guestForm.reset({
+      name: '',
+      email: '',
+      rsvpStatus: 'Pending'
+    });
   }
 
   getStatusClass(status: RsvpStatus) {

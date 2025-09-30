@@ -1,0 +1,58 @@
+@if (member(); as currentMember) {
+  <div class="min-h-screen bg-stone-50 text-stone-800 p-4 sm:p-6 lg:p-8">
+    <div class="max-w-4xl mx-auto">
+      <header class="text-center mb-12">
+        <img [src]="currentMember.imageUrl" [alt]="currentMember.name" class="w-32 h-32 object-cover rounded-full shadow-lg mx-auto mb-4 border-4 border-white">
+        <h1 class="text-4xl font-serif text-stone-700">Welcome, {{ currentMember.name }}!</h1>
+        <p class="text-xl text-rose-600 font-semibold mt-2">{{ currentMember.role }}</p>
+        <p class="text-lg text-stone-500 mt-4">Thank you for being such an important part of our day. Here is your personalized schedule to help things run smoothly.</p>
+      </header>
+
+      <!-- Itinerary Timeline -->
+       <div class="space-y-8">
+        <div class="relative pl-8">
+          <!-- Vertical line -->
+          <div class="absolute left-8 top-0 h-full w-0.5 bg-rose-200"></div>
+      
+          <div class="space-y-12">
+            @for(item of itinerary(); track item.title) {
+              <div class="relative flex items-start">
+                <!-- Icon and Dot -->
+                <div class="absolute left-0 top-1.5 -translate-x-1/2 bg-white flex items-center">
+                  <div class="w-10 h-10 bg-rose-500 rounded-full flex items-center justify-center text-white ring-8 ring-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                      <path stroke-linecap="round" stroke-linejoin="round" [attr.d]="item.icon" />
+                    </svg>
+                  </div>
+                </div>
+      
+                <!-- Content -->
+                <div class="ml-12 pt-1.5 w-full">
+                  <div class="bg-white p-6 rounded-2xl shadow-md border border-stone-200">
+                    <p class="text-md font-semibold text-rose-600 mb-1">{{ item.time }}</p>
+                    <h3 class="text-2xl font-bold text-stone-800">{{ item.title }}</h3>
+                    <p class="mt-2 text-stone-600">{{ item.description }}</p>
+                     <div class="mt-4 pt-4 border-t border-stone-200 flex items-center text-sm text-stone-500">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      <span>{{ item.location }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+} @else {
+  <div class="flex items-center justify-center h-screen bg-stone-50">
+    <div class="text-center">
+      <h2 class="text-2xl font-semibold text-stone-700 mb-4">Bridal Party Member Not Found</h2>
+      <p class="text-stone-500">We couldn't find details for this link. Please check the URL or contact the couple.</p>
+    </div>
+  </div>
+}

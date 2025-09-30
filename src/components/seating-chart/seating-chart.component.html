@@ -1,0 +1,63 @@
+<div class="flex flex-col h-[85vh] space-y-8">
+  <header class="pb-6 border-b border-stone-200">
+    <h2 class="text-4xl font-bold text-stone-800">Seating Chart</h2>
+    <p class="mt-2 text-lg text-stone-600">Arrange your guests at their tables for the reception.</p>
+  </header>
+
+  <div class="flex-grow grid grid-cols-1 lg:grid-cols-4 gap-6 overflow-hidden">
+    <!-- Unassigned Guests -->
+    <aside 
+      class="lg:col-span-1 bg-white p-4 rounded-2xl shadow-md border border-stone-200 flex flex-col"
+      (dragover)="onDragOver($event)"
+      (drop)="onDropOnUnassigned($event)">
+      <h3 class="text-xl font-bold text-stone-800 mb-4 flex-shrink-0">Unassigned Guests ({{ unassignedGuests().length }})</h3>
+      <div class="space-y-2 overflow-y-auto pr-2 flex-grow">
+        @for (guest of unassignedGuests(); track guest.id) {
+          <div 
+            class="p-3 bg-stone-100 rounded-lg cursor-grab active:cursor-grabbing border border-stone-200"
+            draggable="true"
+            (dragstart)="onDragStart($event, guest.id)">
+            <p class="font-semibold text-stone-700">{{ guest.name }}</p>
+          </div>
+        }
+        @if(unassignedGuests().length === 0) {
+          <div class="p-3 text-center text-stone-500 h-full flex items-center justify-center">All attending guests are seated!</div>
+        }
+      </div>
+    </aside>
+
+    <!-- Tables -->
+    <main class="lg:col-span-3 overflow-y-auto pr-2">
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        @for (table of tables(); track table.id) {
+          <div 
+            class="bg-white p-4 rounded-2xl shadow-md border border-stone-200 min-h-[250px] flex flex-col transition-all duration-200"
+            [class.ring-2]="dragOverTableId() === table.id"
+            [class.ring-rose-400]="dragOverTableId() === table.id"
+            [class.bg-rose-50]="dragOverTableId() === table.id"
+            (dragover)="onDragOver($event)"
+            (drop)="onDropOnTable($event, table.id)"
+            (dragenter)="onDragEnterTable(table.id)"
+            (dragleave)="onDragLeaveTable()">
+            <h4 class="text-lg font-bold text-rose-700 border-b border-stone-200 pb-2 mb-3">{{ table.name }}</h4>
+            <div class="space-y-2 flex-grow">
+              @for (guestId of assignments()[table.id] || []; track guestId) {
+                @if (getGuestById(guestId); as guest) {
+                  <div 
+                    class="p-2 bg-rose-50 text-rose-800 rounded-md text-sm border border-rose-200 cursor-grab active:cursor-grabbing"
+                    draggable="true"
+                    (dragstart)="onDragStart($event, guest.id)">
+                    {{ guest.name }}
+                  </div>
+                }
+              }
+            </div>
+            <div class="text-right text-sm text-stone-500 mt-2 pt-2 border-t border-stone-200">
+              {{ (assignments()[table.id] || []).length }} / {{ table.capacity }} seated
+            </div>
+          </div>
+        }
+      </div>
+    </main>
+  </div>
+</div>
