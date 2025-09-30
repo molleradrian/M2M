@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, signal, OnInit, OnDestroy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { DashboardComponent } from './components/dashboard/dashboard.component';
@@ -8,6 +8,8 @@ import { AiAssistantComponent } from './components/ai-assistant/ai-assistant.com
 import { GuestListComponent } from './components/guest-list/guest-list.component';
 import { InviteLinksComponent } from './components/invite-links/invite-links.component';
 import { GuestPortalComponent } from './components/guest-portal/guest-portal.component';
+import { LoginComponent } from './components/login/login.component';
+import { AuthService } from './services/auth.service';
 
 type View = 'dashboard' | 'schedule' | 'gallery' | 'assistant' | 'guest-list' | 'invite-links';
 
@@ -24,6 +26,7 @@ type View = 'dashboard' | 'schedule' | 'gallery' | 'assistant' | 'guest-list' | 
     GuestListComponent,
     InviteLinksComponent,
     GuestPortalComponent,
+    LoginComponent
   ]
 })
 export class AppComponent implements OnInit, OnDestroy {
@@ -31,6 +34,9 @@ export class AppComponent implements OnInit, OnDestroy {
   viewMode = signal<'planner' | 'guest'>('planner');
   guestId = signal<string | null>(null);
   isPlannerView = signal(false);
+
+  private authService = inject(AuthService);
+  isAuthenticated = this.authService.isAuthenticated;
 
   constructor() {
     this.handleHashChange(); // Check initial hash on load
@@ -64,6 +70,11 @@ export class AppComponent implements OnInit, OnDestroy {
 
   changeView(view: View) {
     this.selectedView.set(view);
+  }
+
+  logout() {
+    this.authService.logout();
+    this.selectedView.set('dashboard'); // Reset view on logout
   }
 
   navItems = {
